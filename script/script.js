@@ -68,7 +68,8 @@ document.addEventListener('DOMContentLoaded', function() {
         if (target.classList.contains('category-item')) {
             const category = target.dataset.category;
             getGoods(renderCard, goods => goods.filter(item => item.category.includes(category)));
-                
+              
+            
         }
     };
 
