@@ -8,6 +8,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const cart = document.querySelector('.cart');
     const category = document.querySelector('.category');
 
+    let wishlist = [];
+
     const loading = () => {
         goodsWrapper.innerHTML = `<div id="spinner"><div class="spinner-loading"><div><div><div></div>
         </div><div><div></div></div><div><div></div></div><div><div></div></div></div></div></div>`
@@ -20,7 +22,8 @@ document.addEventListener('DOMContentLoaded', function() {
         card.innerHTML = `<div class="card">
                             <div class="card-img-wrapper">
                                 <img class="card-img-top" src="${img}" alt="">
-                                <button class="card-add-wishlist" data-goods-id="${id}"></button>
+                                <button class="card-add-wishlist ${wishlist.includes(id) ? 'active' : ''}" 
+                                    data-goods-id="${id}"></button>
                             </div>
                             <div class="card-body justify-content-between">
                                 <a href="#" class="card-title">${title}</a>
@@ -51,9 +54,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const renderCard = goods => {
         goodsWrapper.textContent = '';
-        goods.forEach(({ id, title, price, imgMin }) => {
-            goodsWrapper.append(createCardGoods(id, title, price, imgMin));
-        });
+
+        if (goods.length) {
+            goods.forEach(({ id, title, price, imgMin }) => {
+                goodsWrapper.append(createCardGoods(id, title, price, imgMin));
+            });
+        } else {
+            goodsWrapper.textContent = '❌ Извините, мы не нашли товаров по вашему запросу';
+        }
     };
 
     
@@ -87,13 +95,40 @@ document.addEventListener('DOMContentLoaded', function() {
         if (inputValue !== '') {
             const searchString = new RegExp(inputValue, 'i');
             getGoods(renderCard, goods => goods.filter(item => searchString.test(item.title)));
-        };
+        } else {
+            search.classList.add('error');
+            setTimeout( () => {
+                search.classList.remove('error');
+            }, 2000)
+        }
+
+        input.value = '';
     };
 
+    const toggleWishlist = (id, elem) => {
+        if (wishlist.includes(id)) {
+            wishlist.splice(wishlist.indexOf(id), 1);
+            elem.classList.remove('active')
+        } else {
+            wishlist.push(id);
+            elem.classList.add('active')
+        }
+    };
+
+    const handlerGoods = event => {
+        const target = event.target;
+
+        if (target.classList.contains('card-add-wishlist')) {
+            toggleWishlist(target.dataset.goodsId, target);
+        };
+
+    };    
+    
     cartBtn.addEventListener('click', openCart);
     cart.addEventListener('click', closeCart);
     category.addEventListener('click', choiceCategory);
     search.addEventListener('submit', searchGoods);
+    goodsWrapper.addEventListener('click', handlerGoods);
 
     getGoods(renderCard, randomSort);
 });
